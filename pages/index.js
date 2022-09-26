@@ -5,10 +5,10 @@ import styles from "../styles/Home.module.css";
 import Banner from "../components/banner";
 import Card from "../components/card";
 
-import coffeeStoresData from "../data/coffee-stores.json";
+import { fetchCoffeeStores } from "../lib/coffee-stores";
 
 export async function getStaticProps(context) {
-  const coffeeStores = coffeeStoresData;
+  const coffeeStores = await fetchCoffeeStores();
 
   return {
     props: { coffeeStores }, // will be passed to the page component as props
@@ -16,8 +16,6 @@ export async function getStaticProps(context) {
 }
 
 export default function Home(props) {
-  console.log(props);
-
   const handleOnBannerBtnClick = () => {
     console.log("handleOnBannerBtnClick");
   };
@@ -47,8 +45,8 @@ export default function Home(props) {
                   <Card
                     key={coffeeStore.id}
                     className={styles.card}
-                    name={coffeeStore.name}
-                    imgUrl={coffeeStore.imgUrl}
+                    name={coffeeStore.title}
+                    imgUrl={coffeeStore.image}
                     href={`/coffee-store/${coffeeStore.id}`}
                   />
                 );
