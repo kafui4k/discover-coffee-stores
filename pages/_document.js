@@ -16,13 +16,13 @@ class MyDocument extends Document {
             rel="preload"
             href="/fonts/IBMPlexSans-Regular.ttf"
             as="font"
-            crossorigin="anonymous"
+            crossOrigin="anonymous"
           ></link>
           <link
             rel="preload"
             href="/fonts/IBMPlexSans-SemiBold.ttf"
             as="font"
-            crossorigin="anonymous"
+            crossOrigin="anonymous"
           ></link>
         </Head>
         <body>
