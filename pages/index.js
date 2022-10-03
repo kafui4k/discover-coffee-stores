@@ -37,11 +37,14 @@ export default function Home(props) {
       try {
         async function fetchData() {
           // You can await here
-          const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 30);
-          // setCoffeeStores(fetchedCoffeeStores);
+          const fetchedCoffeeStores = await fetch(
+            `/api/getCoffeeStoresByLocation?latLong=${latLong}&limit=30`
+          );
+          const coffeeStores = await fetchedCoffeeStores.json();
+
           dispatch({
             type: ACTION_TYPES.SET_COFFEE_STORES,
-            payload: { coffeeStores: fetchedCoffeeStores },
+            payload: { coffeeStores },
           });
         }
         fetchData();
@@ -91,7 +94,7 @@ export default function Home(props) {
           </div>
         )}
 
-        {props.coffeeStores.length > 0 && (
+        {props.coffeeStores && props.coffeeStores.length > 0 && (
           <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Toronto</h2>
             <div className={styles.cardLayout}>
