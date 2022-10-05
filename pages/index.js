@@ -72,7 +72,12 @@ export default function Home(props) {
         {coffeestoresError && <p>Somethig went wrong: {coffeestoresError}</p>}
 
         <div className={styles.heroImage}>
-          <Image src="/static/hero-image.png" width={700} height={400} />
+          <Image
+            src="/static/hero-image.png"
+            width={700}
+            height={400}
+            alt="banner-image"
+          />
         </div>
 
         {coffeeStores && coffeeStores.length > 0 && (

@@ -2,6 +2,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
+
+import useSWR from "swr";
+
 import cls from "classnames";
 
 import styles from "../../styles/coffee-store.module.css";
@@ -52,7 +55,11 @@ const CoffeeStore = (initialProps) => {
 
   const id = router.query.id;
 
-  const [coffeeStore, setCoffeeStore] = useState(initialProps);
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+  const [votingCount, setVotingCount] = useState(0);
+
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
 
   const {
     state: { coffeeStores },
@@ -60,7 +67,7 @@ const CoffeeStore = (initialProps) => {
 
   const handleCreateCoffeeStore = async (coffeeStore) => {
     try {
-      const { id, name, voting, imgUrl, neighborhood, address } = coffeeStore;
+      const { id, title, voting, image, description, address } = coffeeStore;
 
       const response = await fetch("/api/createCoffeeStore", {
         method: "POST",
@@ -68,17 +75,16 @@ const CoffeeStore = (initialProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id,
-          name,
+          id: `${id}`,
+          name: title,
           voting: 0,
-          imgUrl,
-          neighborhood: neighborhood || "",
+          imgUrl: image,
+          neighborhood: description || "",
           address: address || "",
         }),
       });
 
-      const dbCoffeeStore = response.json();
-      console.log(dbCoffeeStore);
+      const dbCoffeeStore = await response.json();
     } catch (error) {
       console.error("Error creating coffee store", error);
     }
@@ -100,11 +106,40 @@ const CoffeeStore = (initialProps) => {
     }
   }, [id, initialProps, initialProps.coffeeStore]);
 
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setCoffeeStore(data[0]);
+      setVotingCount(data[0].voting);
+    }
+  }, [data]);
+
   const { address, title, description, image } = coffeeStore;
 
-  const handleUpvoteButton = () => {
-    console.log("handle upvote");
+  const handleUpvoteButton = async () => {
+    try {
+      const response = await fetch("/api/favouriteCoffeeStoreById", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      });
+
+      const dbCoffeeStore = await response.json();
+
+      if (dbCoffeeStore && dbCoffeeStore.length > 0) {
+        let count = votingCount + 1;
+        setVotingCount(count);
+      }
+    } catch (error) {
+      console.error("Error upvoting coffee store", error);
+    }
   };
+
+  if (error)
+    return <div>Something went wrong retrieving coffee store from page</div>;
 
   return (
     <div className={styles.layout}>
@@ -131,16 +166,31 @@ const CoffeeStore = (initialProps) => {
         </div>
         <div className={cls("glass", styles.col2)}>
           <div className={styles.iconWrapper}>
-            <Image src="/static/icons/places.svg" width={24} height={24} />
+            <Image
+              src="/static/icons/places.svg"
+              width={24}
+              height={24}
+              alt="icon-image"
+            />
             <p className={styles.text}>{description}</p>
           </div>
           <div className={styles.iconWrapper}>
-            <Image src="/static/icons/nearMe.svg" width={24} height={24} />
+            <Image
+              src="/static/icons/nearMe.svg"
+              width={24}
+              height={24}
+              alt="icon-image"
+            />
             <p className={styles.text}>neighboruhood</p>
           </div>
           <div className={styles.iconWrapper}>
-            <Image src="/static/icons/star.svg" width={24} height={24} />
-            <p className={styles.text}>1</p>
+            <Image
+              src="/static/icons/star.svg"
+              width={24}
+              height={24}
+              alt="icon-image"
+            />
+            <p className={styles.text}>{votingCount}</p>
           </div>
 
           <button className={styles.upvoteButton} onClick={handleUpvoteButton}>
